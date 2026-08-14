@@ -1,7 +1,7 @@
 {% set version = "2.02.187" %}
 
 package:
-  name: libdevmapper
+  name: lvm2-split
   version: {{ version }}
 
 source:
@@ -17,6 +17,7 @@ build:
 requirements:
   build:
     - {{ compiler('c') }}
+    - {{ stdlib('c') }}
     - autoconf >=2.69
     - autoconf-archive
     - automake
@@ -24,14 +25,71 @@ requirements:
     - pkg-config
   host:
     - libaio
-  run:
 
-test:
-  commands:
-    - test -f "${PREFIX}/lib/libdevmapper${SHLIB_EXT}"
-    - test -f "${PREFIX}/lib/pkgconfig/devmapper.pc"
-    - test -f "${PREFIX}/include/libdevmapper.h"
+outputs:
+  - name: libdevmapper
 
+    files:
+      include:
+        - "lib/libdevmapper.so*"
+        - "lib/pkgconfig/devmapper.pc"
+        - "include/libdevmapper.h"
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ stdlib('c') }}
+        - autoconf >=2.69
+        - autoconf-archive
+        - automake
+        - make
+      host:
+        - libaio
+    build:
+      run_exports:
+        - {{ pin_subpackage('libdevmapper', max_pin='x.x') }}
+    test:
+      commands:
+        - test -f "${PREFIX}/lib/libdevmapper.so"
+        - test -f "${PREFIX}/lib/pkgconfig/devmapper.pc"
+        - test -f "${PREFIX}/include/libdevmapper.h"
+
+  - name: lvm2
+
+    files:
+      include:
+        - "bin/**/*"
+        - "lib/**/*"
+        - "libexec/**/*"
+        - "share/**/*"
+        - "etc/**/*"
+      exclude:
+        - "lib/libdevmapper.so*"
+        - "lib/pkgconfig/devmapper.pc"
+        - "include/libdevmapper.h"
+
+
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ stdlib('c') }}
+        - autoconf >=2.69
+        - autoconf-archive
+        - automake
+        - make
+      host:
+        - libaio
+      run:
+        - {{ pin_subpackage('libdevmapper', exact=True) }}
+
+    test:
+      commands:
+        - lvm version
+        - pvcreate --help
+        - vgcreate --help
+        - lvcreate --help
+
+    extra:
+      feedstock-name: libdevmapper
 about:
   home: https://sourceware.org/dm/
   dev_url: https://sourceware.org/git/lvm2.git
