@@ -9,7 +9,7 @@ source:
   sha256: 0e0d521a863a5db2440f2e1e7627ba82b70273ae4ab0bbe130851db0d58e5af1
 
 build:
-  number: 1
+  number: 3
   skip: True  # [not linux]
   run_exports:
     - {{ pin_subpackage('libdevmapper', max_pin='x.x') }}
@@ -78,6 +78,7 @@ outputs:
         - make
       host:
         - libaio
+        - util-linux
       run:
         - {{ pin_subpackage('libdevmapper', exact=True) }}
 
